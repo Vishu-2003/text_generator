@@ -37,10 +37,15 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
   riverpod_annotation: ^2.6.1
-  google_mlkit_text_recognition: ^0.14.0
   flutter_svg: ^2.0.16
   image_picker: ^1.1.2
   permission_handler: ^11.3.1
+  flutter_animate: ^4.5.2
+  google_mlkit_text_recognition: ^0.14.0
+  animated_text_kit: ^4.2.2
+  auto_size_text: ^3.0.0
+  flutter_spinkit: ^5.2.1
+
 
 dev_dependencies:
   flutter_test:

@@ -4,4 +4,5 @@ class AppIcon{
   AppIcon._();
   static const faq = "$iconPath/Faq.svg";
   static const uploadImage="$iconPath/uploadimage.svg";
+  static const eater="$iconPath/beaneater.gif";
 }

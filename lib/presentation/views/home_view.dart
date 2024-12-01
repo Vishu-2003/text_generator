@@ -1,13 +1,17 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:river_pod_todo/presentation/components/c_core_button.dart';
 import 'package:river_pod_todo/providers/image_providers/image_states.dart';
 import 'package:river_pod_todo/utils/app_assets.dart';
 import 'package:river_pod_todo/utils/app_extension.dart';
 
 import '../../providers/image_providers/image_notifires.dart';
+import '../../providers/text_providers/text_notifires.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_textxtheme.dart';
 import '../components/c_dilogbox.dart';
@@ -21,6 +25,7 @@ class HomeView extends ConsumerWidget{
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final imageState = ref.watch(imageProvider);
+    final textState  = ref.watch(textProvider);
     return Scaffold(
       backgroundColor:white,
       appBar: AppBar(
@@ -36,32 +41,82 @@ class HomeView extends ConsumerWidget{
       ),
       body:Column(
         children: [
-          CustomPaint(
-            painter:SlashedBorderPainter() ,
-            child: CCoreButton(
-              child: Container(
-                height: 300,
-                width: double.infinity,
-                child:Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    setIcon(AppIcon.uploadImage,color: green,width: 80),
-                    SizedBox(height: 10),
-                    CText(" Tap Upload Image From Gallery",style: TextThemeX.text16)
-                  ],
-                ),
+          if(imageState.image!=null)
+          Container(
+              height: 300,
+              width: double.infinity,
+              child: imageState.isLoading!
+                 ? SpinKitChasingDots()
+                 : Image.file(
+                imageState.image!,
+                fit: BoxFit.contain,
               ),
-              onPressed:(){
-                ref.read(imageProvider.notifier).pickImageFromGallery();
-              },
+            )   .animate()
+                .scale(begin: Offset(0,0),end: Offset(1,1),duration: Duration(milliseconds:800))
+                .fade(),      
+          if(imageState.image==null)
+            CustomPaint(
+              painter:SlashedBorderPainter() ,
+              child: CCoreButton(
+                child: Container(
+                  height: 300,
+                  width: double.infinity,
+                  child:Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      setIcon(AppIcon.uploadImage,color: green,width: 80),
+                      SizedBox(height: 10),
+                      CText(" Tap Upload Image From Gallery",style: TextThemeX.text16)
+                    ],
+                  ),
+                ),
+                onPressed:(){
+                  ref.read(imageProvider.notifier).pickImageFromGallery();
+                },
+              ),
             ),
-          ),
+          if(textState.generatedText!=null)
+            textState.isLoading
+          ? SpinKitChasingDots()
+          : Expanded(
+              child: ListView(
+                children: [
+                  AnimatedTextKit(
+                    isRepeatingAnimation: false,
+                    animatedTexts: [
+                      TypewriterAnimatedText(
+                          textState.generatedText!,
+                          textStyle: TextThemeX.text14,
+                          textAlign: TextAlign.start,
+                          cursor: " | "
+                      )
+                    ],)
+                ],
+              ),
+            ),
           Spacer(),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
+              onPressed: (){
+               ref.read(imageProvider.notifier).deleteSelectedImage();
+               ref.read(textProvider.notifier).deleteGeneratedText();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4)
+                ),
+                side:BorderSide(color: green),
+              ),
+              child:CText("Remove",style: TextThemeX.text16.copyWith(color: green),),
+            ),
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
                 onPressed: (){
-
+                   ref.read(imageProvider.notifier).clickImageFromCamera();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: white,
@@ -76,7 +131,9 @@ class HomeView extends ConsumerWidget{
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: (){},
+              onPressed: (){
+                ref.read(textProvider.notifier).generateTextFromImage(imageState.image);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor:green,
                 shape: RoundedRectangleBorder(
